@@ -37,6 +37,7 @@ import ants.utils
 import iris
 import iris.analysis.calculus
 import numpy as np
+import numpy.ma as ma
 
 from . import _merge, cover_mapping
 from ._merge import (
@@ -493,7 +494,7 @@ def find_similar_region(
     return tuple([[ind[i] for ind in list(indices)] for i in range(array.ndim)])
 
 
-def make_consistent_with_lsm(sources, lsm, invert_mask, method="spiral"):
+def make_consistent_with_lsm(sources, lsm, invert_mask, set_mdi_zero=False, method="spiral"):
     """
     Make the provided source(s) consistent with the provided land sea mask.
 
@@ -516,6 +517,8 @@ def make_consistent_with_lsm(sources, lsm, invert_mask, method="spiral"):
     invert_mask : bool
         Invert the mask (land field) or not (ocean field).  The landsea mask
         has True values to denote land.
+    set_mdi_zero : bool, optional
+        Set the resulting missing value points to have value zero.
     method : :obj:`str`, optional
         Select the search method to be used when filling missing points. The methods
         currently supported are "spiral" and "kdtree".
@@ -576,3 +579,7 @@ def make_consistent_with_lsm(sources, lsm, invert_mask, method="spiral"):
             ants.utils.cube.guess_horizontal_bounds(cube)
         filler = Filler(cube, target_mask=mask)
         filler(cube)
+    if set_mdi_zero:
+        for cube in sources:
+            if ma.is_masked(cube):
+                cube.data.filled(0.0)

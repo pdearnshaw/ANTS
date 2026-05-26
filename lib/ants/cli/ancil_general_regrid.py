@@ -28,6 +28,7 @@ it fits the definition of a zonal mean. This ensures that a zonal mean output
 is produced, regardless of the number of longitude
 points in the regrid target.
 """
+
 import ants
 import ants.decomposition as decomp
 import ants.io.save as save
@@ -76,6 +77,7 @@ def main(
     save_ukca,
     netcdf_only,
     search_method,
+    set_mdi_zero,
 ):
     """
     General regrid application top level call function.
@@ -118,6 +120,8 @@ def main(
         provided source(s) consistent with the provided land sea mask.
         This should only be provided if a target land sea mask is also
         provided via target_lsm_path.
+    set_mdi_zero : :obj:`bool`, optional
+        Set any MDI values in the result to zero.
 
     Returns
     -------
@@ -142,7 +146,7 @@ def main(
     regridded_cubes = decomp.decompose(regrid, source_cubes, target_cube)
     if target_lsm_path:
         ants.analysis.make_consistent_with_lsm(
-            regridded_cubes, target_cube, invert_mask, search_method
+            regridded_cubes, target_cube, invert_mask, set_mdi_zero, search_method
         )
 
     if save_ukca:
@@ -190,6 +194,13 @@ def _get_parser():
         required=False,
         default="spiral",
     )
+    parser.add_argument(
+        "--set-mdi-zero",
+        action="store_true",
+        help="Set any MDI to zero",
+        required=False,
+        default=False
+    )
     return parser
 
 
@@ -210,6 +221,7 @@ def cli_interface():
         args.save_ukca,
         args.netcdf_only,
         args.search_method,
+        args.set_mdi_zero,
     )
 
 
