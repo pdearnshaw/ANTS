@@ -581,5 +581,5 @@ def make_consistent_with_lsm(sources, lsm, invert_mask, set_mdi_zero=False, meth
         filler(cube)
     if set_mdi_zero:
         for cube in sources:
-            if ma.is_masked(cube):
-                cube.data.filled(0.0)
+            if ma.is_masked(cube.data):
+                cube.data = cube.data.filled(0.0)
